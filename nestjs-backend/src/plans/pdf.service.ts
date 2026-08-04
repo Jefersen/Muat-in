@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as PDFDocument from 'pdfkit';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const PDFDocument = require('pdfkit');
 
 @Injectable()
 export class PdfService {
@@ -11,7 +12,7 @@ export class PdfService {
         const doc = new PDFDocument({ margin: 50, size: 'A4' });
         const buffers: Buffer[] = [];
 
-        doc.on('data', (chunk) => buffers.push(chunk));
+        doc.on('data', (chunk: Buffer) => buffers.push(chunk));
         doc.on('end', () => resolve(Buffer.concat(buffers)));
         doc.on('error', reject);
 
