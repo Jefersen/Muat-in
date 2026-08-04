@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # 1. Local Database (PostgreSQL) for offline development & testing
+  db:
+    image: postgres:15-alpine
+    container_name: muatin-postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: muatin
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Automatically initialize database schema from Stage 1 script
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - muatin-network
+
+  # 2. Main NestJS Backend API
+  nestjs-backend:
+    build:
+      context: ./nestjs-backend
+      dockerfile: Dockerfile
+    container_name: muatin-nestjs-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgrespassword@db:5432/muatin
+      - PYTHON_AI_ENGINE_URL=http://python-ai-engine:8000
+    networks:
+      - muatin-network
+
+  # 3. Python FastAPI AI & Math Engine
+  python-ai-engine:
+    build:
+      context: ./python-ai-engine
+      dockerfile: Dockerfile
+    container_name: muatin-python-ai-engine
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    networks:
+      - muatin-network
+
+volumes:
+  postgres_data:
+
+networks:
+  muatin-network:
+    driver: bridge

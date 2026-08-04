@@ -13,3 +13,29 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# NestJS & Node
+node_modules/
+/dist
+/nestjs-backend/node_modules/
+/nestjs-backend/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python FastAPI
+/python-ai-engine/.venv/
+/python-ai-engine/__pycache__/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Local Environment Variables
+.env
+.env.local
+
+# OS Files
+.DS_Store
+Thumbs.db
