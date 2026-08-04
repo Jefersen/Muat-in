@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 1. Local Database (PostgreSQL) for offline development & testing
   db:

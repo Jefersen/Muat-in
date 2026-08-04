@@ -136,7 +136,8 @@ export class PlansService {
       await client.query('UPDATE load_plans SET qr_code_payload = $1 WHERE id = $2', [qrPayload, planId]);
 
       // Insert packed items coordinates
-      for (const item of packed_items) {
+      for (let seq = 0; seq < packed_items.length; seq++) {
+        const item = packed_items[seq];
         const itemInsertQuery = `
           INSERT INTO load_plan_items (
             load_plan_id, item_id, sequence_no, x_pos, y_pos, z_pos, rotation_state, is_placed, weight_category
@@ -145,7 +146,7 @@ export class PlansService {
         await client.query(itemInsertQuery, [
           planId,
           item.item_id,
-          item.sequence_no,
+          seq + 1,
           item.x_pos,
           item.y_pos,
           item.z_pos,
