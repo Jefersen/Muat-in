@@ -20,7 +20,7 @@ export class ExecutePlanDto {
 
   @ApiProperty({ type: [PlanItemDto], description: 'List of items to pack with their quantities' })
   @IsArray()
-  @ValidateNested({ generosity: true, each: true })
+  @ValidateNested({ each: true })
   @Type(() => PlanItemDto)
   items!: PlanItemDto[];
 }
