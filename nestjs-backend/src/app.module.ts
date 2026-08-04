@@ -7,14 +7,13 @@ import { AuthModule } from './auth/auth.module';
 import { ItemsModule } from './items/items.module';
 import { TrucksModule } from './trucks/trucks.module';
 import { PlansModule } from './plans/plans.module';
+import { SupabaseModule } from './supabase/supabase.module';
 
 @Module({
   imports: [
-    // Register Configuration globally
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
+    SupabaseModule,
     AuthModule,
     ItemsModule,
     TrucksModule,
@@ -24,3 +23,4 @@ import { PlansModule } from './plans/plans.module';
   providers: [AppService],
 })
 export class AppModule {}
+

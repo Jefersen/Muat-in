@@ -3,6 +3,8 @@ import { DatabaseService } from '../database/database.service';
 import { HttpService } from '@nestjs/axios';
 import { ExecutePlanDto } from './dto/execute-plan.dto';
 import { firstValueFrom } from 'rxjs';
+import { PdfService } from './pdf.service';
+import { SupabaseService } from '../supabase/supabase.service';
 
 @Injectable()
 export class PlansService {
@@ -11,6 +13,8 @@ export class PlansService {
   constructor(
     private readonly db: DatabaseService,
     private readonly httpService: HttpService,
+    private readonly pdfService: PdfService,
+    private readonly supabaseService: SupabaseService,
   ) {}
 
   async executePlan(userId: string, dto: ExecutePlanDto) {
@@ -251,7 +255,7 @@ export class PlansService {
       }
     }
 
-    return {
+    const manifestData = {
       manifest_id: plan.id,
       created_at: plan.created_at,
       status: plan.status,
@@ -291,6 +295,29 @@ export class PlansService {
         rotation_state: item.rotation_state,
         weight_category: item.weight_category
       }))
+    };
+
+    // Generate PDF and upload to Supabase Storage
+    let manifestPdfUrl: string | null = plan.manifest_document_url || null;
+    try {
+      this.logger.log(`Generating PDF for plan ${planId}...`);
+      const pdfBuffer = await this.pdfService.generateManifestPdf(manifestData);
+      manifestPdfUrl = await this.supabaseService.uploadManifestPdf(planId, pdfBuffer);
+
+      if (manifestPdfUrl) {
+        await this.db.query(
+          'UPDATE load_plans SET manifest_document_url = $1, status = $2 WHERE id = $3',
+          [manifestPdfUrl, 'manifested', planId]
+        );
+        manifestData.status = 'manifested';
+      }
+    } catch (pdfErr: any) {
+      this.logger.warn(`PDF generation skipped: ${pdfErr.message}`);
+    }
+
+    return {
+      ...manifestData,
+      manifest_pdf_url: manifestPdfUrl,
     };
   }
 }
